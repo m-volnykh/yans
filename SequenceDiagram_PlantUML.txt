@@ -1,0 +1,56 @@
+@startuml
+
+actor Клиент
+participant "Мобильное приложение" as App
+participant "Система 1С" as System
+participant "Модуль расчета доставки" as DeliveryCalc
+participant "Сервис курьеров" as CourierService
+participant Курьер
+participant "Платежная система" as PaymentSystem
+
+== Создание заказа ==
+
+Клиент -> App : Создать заказ
+App -> System : Отправить данные заказа
+
+System -> DeliveryCalc : Рассчитать стоимость доставки
+DeliveryCalc --> System : Стоимость доставки
+
+System -> System : Создать документ Заказ
+
+== Оплата ==
+
+alt Онлайн оплата
+    System -> PaymentSystem : Запрос на оплату
+    PaymentSystem --> System : Успешно / Ошибка
+else Оплата при получениие
+    System -> System : Установить статус "ожидает оплаты"
+end
+
+== Назначение курьера ==
+
+System -> CourierService : Найти свободного курьера
+CourierService --> System : Курьер
+
+System -> Курьер : Назначение заказа
+Курьер --> System : Подтверждение
+
+== Доставка ==
+
+System -> App : Уведомление клиенту (курьер назначен)
+
+Курьер -> System : Забрал заказ
+System -> App : Статус "в пути"
+
+Курьер -> System : Доставил заказ
+System -> App : Статус "доставлен"
+
+== Завершение ==
+
+opt Статус "Ожидает оплаты"
+    System -> System : Зафиксировать оплату
+end
+
+System -> System : Обновить статус заказа
+
+@enduml

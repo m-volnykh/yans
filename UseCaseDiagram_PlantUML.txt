@@ -1,0 +1,53 @@
+@startuml
+header Служба доставки еды
+title \nДиаграмма прецедентов (Use Case)\n
+
+left to right direction
+
+' --- Акторы с иконками и цветом ---
+actor "Клиент" as Customer #DDCCFF
+actor "Курьер" as Courier #CCFFCC
+actor "Бухгалтер" as Accountant #FFFFAA
+actor "Администратор" as Admin #FFFFAA
+
+' --- Основная система ---
+rectangle "Информационная система доставки" #F0F0F0 {
+    
+    package "Блок Клиента" #DDCCFF {
+        usecase "Создать заказ" as UC1 
+        usecase "Отслеживать заказ" as UC2
+        usecase "Оплатить заказ" as UC3
+    }
+
+    package "Блок Логистики" #CCFFCC {
+        usecase "Принять заказ" as UC4
+        usecase "Обновить статус заказа" as UC5
+        usecase "Просмотреть историю заказов" as UC6
+    }
+
+    package "Бизнес и Учет" #FFFFAA {
+        usecase "Учет платежей" as UC7
+        usecase "Аналитика и отчеты" as UC8
+    }
+}
+
+' --- Определение связей ---
+
+' Связи Клиента
+Customer ---> UC1
+Customer ---> UC2
+Customer ---> UC3
+
+UC3 .down.> UC1 : <<extend>>
+
+' Связи Курьера
+Courier ---> UC4
+Courier ---> UC5 
+Courier ---> UC6
+
+UC5 .down.> UC4 : <<include>> 
+
+' Связи сотрудников
+Accountant ---> UC7
+Admin ---> UC8
+@enduml

@@ -1,0 +1,70 @@
+@startuml
+skinparam componentStyle rectangle
+
+' =======================
+' Клиентская часть
+' =======================
+
+package "Клиент" {
+    [Мобильное приложение] as MobileApp
+    [Модуль расчета доставки] as ClientDeliveryCalc
+}
+
+' =======================
+' Серверная часть (1С)
+' =======================
+
+package "Система 1С" {
+
+    [API обработки заказов] as OrderAPI
+    [Модуль заказов] as OrderModule
+    [Модуль курьеров] as CourierModule
+    [Модуль тарифов доставки] as TariffModule
+    [Модуль оплаты] as PaymentModule
+    [Аналитика и отчеты] as Analytics
+
+    [База данных] as DB
+}
+
+' =======================
+' Внешние системы
+' =======================
+
+package "Внешние сервисы" {
+    [Платежная система] as PaymentSystem
+    [Картографический сервис] as MapService
+}
+
+' =======================
+' Взаимодействие
+' =======================
+
+MobileApp --> OrderAPI : REST / HTTP
+
+' Получение данных для расчета
+MobileApp --> TariffModule : запрос тарифов
+ClientDeliveryCalc --> MapService : расчет расстояния
+
+' Создание заказа
+MobileApp --> OrderAPI : заказ + рассчитанная стоимость
+
+OrderAPI --> OrderModule
+OrderAPI --> PaymentModule
+
+OrderModule --> CourierModule
+OrderModule --> DB
+
+CourierModule --> DB
+PaymentModule --> PaymentSystem
+PaymentModule --> DB
+
+Analytics --> DB
+
+' =======================
+' Логические зависимости
+' =======================
+
+ClientDeliveryCalc ..> TariffModule : использует тарифы
+OrderModule --> PaymentModule : статус оплаты
+OrderModule --> Analytics : данные для отчетов
+@enduml
